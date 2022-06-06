@@ -1,0 +1,71 @@
+#include    "xc.h"              // Microchip XC8 compiler include file
+#include    "stdint.h"          // Include integer definitions
+#include    "stdbool.h"         // Include Boolean (true/false) definitions
+
+#include    "UBMP4.h"           // Include UBMP4 constants and functions
+
+// TODO Set linker ROM ranges to 'default,-0-7FF' under "Memory model" pull-down.
+// TODO Set linker code offset to '800' under "Additional options" pull-down.
+
+// Program variable definitions
+unsigned char TonLED3 = 127;
+unsigned char TonLED4 = 127; 
+unsigned char TonLED5 = 127; 
+unsigned char TonLED6 = 127;     // LED brightness PWM value
+unsigned char PWMperiod;        // PWM period counter for PWM loops
+unsigned int period = 460;      // Sound period value for later activities
+
+int main(void)
+{
+    OSC_config();               // Configure internal oscillator for 48 MHz
+    UBMP4_config();             // Configure on-board UBMP4 I/O devices
+	
+    while(1)
+	{
+        // Decrease brightness
+        if(SW2 == 0)
+        {
+            TonLED3 -= 1;
+            TonLED4 -= 1;
+            TonLED5 -= 1;
+            TonLED6 -= 1;
+        }
+
+        // Increase brightness
+        if(SW3 == 0)
+        {
+            TonLED3 += 1;
+            TonLED4 += 1;
+            TonLED5 += 1;
+            TonLED6 += 1;
+        }
+        
+        // PWM LED4 brightness
+        PWMperiod = 255;
+        while(PWMperiod != 0)
+        {
+            if(TonLED4 == PWMperiod)
+            {
+                LED2 = 1;
+                LED3 = 1;
+                LED4 = 1;
+                LED5 = 1;
+                LED6 = 1;
+                    
+            }
+            PWMperiod --;
+            __delay_us(20);
+        }
+        LED2 = 0;
+        LED3 = 0;
+        LED4 = 0;
+        LED5 = 0;
+        LED6 = 0;
+        
+        // Activate bootloader if SW1 is pressed.
+        if(SW1 == 0)
+        {
+            RESET();
+        }
+    }
+}
